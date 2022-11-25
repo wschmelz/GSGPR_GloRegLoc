@@ -56,8 +56,9 @@ def WHE_NSE(hyp1_in,hyp2_in,t_matrix_i,noise_mat_in,s_mat1,s_mat2):
 #stepsize_divisor is a single positive floating point number, 10-100 is reasonable.
 #MCMC_iters is number of  iterations for MCMC process, 2000-10000 is reasonable
 #new_dt is sample rate of plotted functions
+#fit indicates whether to refit parameters: 1 is fit, 2 is use guess_orig
 
-def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,stepsize_divisor,MCMC_iters,new_dt):
+def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,stepsize_divisor,MCMC_iters,new_dt,fit):
 	global count
 	xes1_t_1 = data_series[:,0]
 	xes2_sl_1 = data_series[:,1]
@@ -120,193 +121,196 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,st
 
 	new_mults_t_1 = numpy.repeat(numpy.reshape(xes1_t_1,(1,-1)),n_SL_1,axis=0) * numpy.repeat(numpy.reshape(xes1_t_1,(-1,1)),n_SL_1,axis=1)
 	count = 0
-	def optimize_MLE_merge_guess_f(guess1):
-		global count
-		K1 =  matern(guess1[0],3.,guess1[1],t_matrix_1)
-			
-		K2 =  matern(guess1[2],3.,guess1[3],t_matrix_1) * s_matrix_1
-		
-		K3 =  matern(guess1[4],3.,guess1[5],t_matrix_1) * s_matrix_2
-		
-		K4 =  matern(guess1[6],1.,guess1[7],t_matrix_1) * s_matrix_2
-		
-		K5 =  linear_G(guess1[8],guess1[9],new_mults_t_1)
-		
-		K6 =  linear_RL(guess1[10],guess1[11],new_mults_t_1,s_matrix_1)
-		
-		K7 =  linear_RL(guess1[12],guess1[13],new_mults_t_1,s_matrix_2)
-		
-		WN = WHE_NSE(guess1[14],guess1[15],t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
-		
-		K_1 = K1 + K2 + K3 + K4 + K5 + K6 + K7 + WN
-		
-		K_inv = numpy.linalg.inv(K_1)
-		matmul_tmp = numpy.matmul(y_transpose_1,K_inv)
-		term1 = (-1./2.) * numpy.matmul(matmul_tmp,y_1)
-		det_k = numpy.linalg.slogdet(K_1)[1]
-		term2 = (1./2.) * det_k
-		term3 = (float(len(y_1))/2.) * numpy.log(2.*numpy.pi)
-		opt_outs_GPR_1 = term1 - term2 - term3
-		
-		opt_outs_GPR = opt_outs_GPR_1[0]
-		
-		if opt_outs_GPR > 0:
-			opt_outs_GPR = numpy.nan
-		
-		opt_outs_GPR = opt_outs_GPR * -1.
-		
-		count = count + 1
-		if count % 1000 == 0:
-			print ("Count:",count)
-			#print("Diff. evo. params tmp:",guess1)
-			print("Nelder-Mead params tmp:",guess1)
-			#print("Diff. evo. loglik tmp:",opt_outs_GPR)
-			print("Nelder-Mead loglik tmp:",opt_outs_GPR)
-			print ("")
-		return opt_outs_GPR
-		
-	def optimize_MLE_merge_guess(guess1):
-
-		K1 =  matern(guess1[0],3.,guess1[1],t_matrix_1)
-			
-		K2 =  matern(guess1[2],3.,guess1[3],t_matrix_1) * s_matrix_1
-		
-		K3 =  matern(guess1[4],3.,guess1[5],t_matrix_1) * s_matrix_2
-		
-		K4 =  matern(guess1[6],1.,guess1[7],t_matrix_1) * s_matrix_2
-		
-		K5 =  linear_G(guess1[8],guess1[9],new_mults_t_1)
-		
-		K6 =  linear_RL(guess1[10],guess1[11],new_mults_t_1,s_matrix_1)
-		
-		K7 =  linear_RL(guess1[12],guess1[13],new_mults_t_1,s_matrix_2)
-		
-		WN = WHE_NSE(guess1[14],guess1[15],t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
-		
-		K_1 = K1 + K2 + K3 + K4 + K5 + K6 + K7 + WN
-		
-		K_inv = numpy.linalg.inv(K_1)
-		matmul_tmp = numpy.matmul(y_transpose_1,K_inv)
-		term1 = (-1./2.) * numpy.matmul(matmul_tmp,y_1)
-		det_k = numpy.linalg.slogdet(K_1)[1]
-		term2 = (1./2.) * det_k
-		term3 = (float(len(y_1))/2.) * numpy.log(2.*numpy.pi)
-		opt_outs_GPR_1 = term1 - term2 - term3
-		
-		opt_outs_GPR = opt_outs_GPR_1[0]
-		
-		if opt_outs_GPR > 0:
-			opt_outs_GPR = numpy.nan
-		
-		opt_outs_GPR = opt_outs_GPR * -1.
-
-		return opt_outs_GPR		
-
-	lb1 = guess_orig*0.
-	ub1= lb1 + 9999.
-	'''
-	bounds2 = []
-	for n in range(0,len(ub1)):
-		bounds2.append([lb1[n],ub1[n]],)
-	bounds2 = tuple(bounds2)
-	'''
-	print("Original:",guess_orig)
-	bounds1 = scipy.optimize.Bounds(lb=0., ub=numpy.inf, keep_feasible=False)
-	res = scipy.optimize.minimize(optimize_MLE_merge_guess_f,guess_orig,method='Nelder-Mead',bounds=bounds1,tol=10e-6,options={'maxfev':30000})
-	#res = scipy.optimize.differential_evolution(optimize_MLE_merge_guess_f,bounds2,x0=guess_orig,maxiter=1000)
-	
-	guess_orig2 = res.x
-	#guess_orig2 = guess_orig*1.
-	
-	print ("Nelder-Mead:",guess_orig2)
-	
-	old_alpha = numpy.absolute(guess_orig2)
-	new_alpha = old_alpha * 1.0
-	
-	stepsizes = guess_orig2/stepsize_divisor
-
-	output_matrix_A = numpy.zeros((MCMC_iters,len(guess_orig2)))* numpy.nan
-
-	loglik_output = numpy.zeros((MCMC_iters,2))
-	accept_output = numpy.zeros((MCMC_iters,2)) * numpy.nan
-
-	# Metropolis-Hastings
-
-	file_out = wkspc + 'posterior_hyperparams.csv'
-	file_out2 = wkspc + 'accept_array.csv'
-
-	print ("go")
-
-	t1 = float(time.time())
-	index_to_change = 0
-	for n in range(MCMC_iters):
-
-		if n % 1000 == 0:
-		
-			if n > 0:
-				t2 = float(time.time())
-				time_per = (t2 - t1) / (float(n))
-				accept_output[n,1] = time_per
-				print ("...")
-				print ("accept rate: ", numpy.mean(accept_output[0:n,0]))
-				print ("process time rate: ",time_per)
-				print ("loglik: ",old_loglik)
-				print ("###")
-			
-				numpy.savetxt(file_out,output_matrix_A,delimiter=',',fmt='%10.8e')
-				numpy.savetxt(file_out2,accept_output,delimiter=',',fmt='%10.5f')	
-			
-		if n > 0:
-			old_alpha  = output_matrix_A[n-1,:]
-			old_loglik = loglik_output[n-1,0]
-
-		new_alpha[index_to_change] = numpy.absolute(numpy.random.normal(loc = old_alpha[index_to_change], scale = stepsizes[index_to_change]))
-		index_to_change = index_to_change + 1
-
-		if index_to_change == len(new_alpha):
-			index_to_change = 0		
-		
-		new_loglik = optimize_MLE_merge_guess(new_alpha)
-		
-		if n == 0:
-			old_loglik = new_loglik * .9999999999999
-			
-		if numpy.isnan(new_loglik) == False:
-			if (new_loglik < old_loglik):
-				output_matrix_A[n,:] = new_alpha
-				loglik_output[n,0] = new_loglik
-				accept_output[n,0] = 1.0
-
-			else:			
-				u = numpy.random.uniform(0.0,1.0)
+	if fit == 1:
+		def optimize_MLE_merge_guess_f(guess1):
+			global count
+			K1 =  matern(guess1[0],3.,guess1[1],t_matrix_1)
 				
-				if (u < numpy.exp(old_loglik - new_loglik)):
-					output_matrix_A[n,:] = new_alpha				
+			K2 =  matern(guess1[2],3.,guess1[3],t_matrix_1) * s_matrix_1
+			
+			K3 =  matern(guess1[4],3.,guess1[5],t_matrix_1) * s_matrix_2
+			
+			K4 =  matern(guess1[6],1.,guess1[7],t_matrix_1) * s_matrix_2
+			
+			K5 =  linear_G(guess1[8],guess1[9],new_mults_t_1)
+			
+			K6 =  linear_RL(guess1[10],guess1[11],new_mults_t_1,s_matrix_1)
+			
+			K7 =  linear_RL(guess1[12],guess1[13],new_mults_t_1,s_matrix_2)
+			
+			WN = WHE_NSE(guess1[14],guess1[15],t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
+			
+			K_1 = K1 + K2 + K3 + K4 + K5 + K6 + K7 + WN
+			
+			K_inv = numpy.linalg.inv(K_1)
+			matmul_tmp = numpy.matmul(y_transpose_1,K_inv)
+			term1 = (-1./2.) * numpy.matmul(matmul_tmp,y_1)
+			det_k = numpy.linalg.slogdet(K_1)[1]
+			term2 = (1./2.) * det_k
+			term3 = (float(len(y_1))/2.) * numpy.log(2.*numpy.pi)
+			opt_outs_GPR_1 = term1 - term2 - term3
+			
+			opt_outs_GPR = opt_outs_GPR_1[0]
+			
+			if opt_outs_GPR > 0:
+				opt_outs_GPR = numpy.nan
+			
+			opt_outs_GPR = opt_outs_GPR * -1.
+			
+			count = count + 1
+			if count % 1000 == 0:
+				print ("Count:",count)
+				#print("Diff. evo. params tmp:",guess1)
+				print("Nelder-Mead params tmp:",guess1)
+				#print("Diff. evo. loglik tmp:",opt_outs_GPR)
+				print("Nelder-Mead loglik tmp:",opt_outs_GPR)
+				print ("")
+			return opt_outs_GPR
+			
+		def optimize_MLE_merge_guess(guess1):
+
+			K1 =  matern(guess1[0],3.,guess1[1],t_matrix_1)
+				
+			K2 =  matern(guess1[2],3.,guess1[3],t_matrix_1) * s_matrix_1
+			
+			K3 =  matern(guess1[4],3.,guess1[5],t_matrix_1) * s_matrix_2
+			
+			K4 =  matern(guess1[6],1.,guess1[7],t_matrix_1) * s_matrix_2
+			
+			K5 =  linear_G(guess1[8],guess1[9],new_mults_t_1)
+			
+			K6 =  linear_RL(guess1[10],guess1[11],new_mults_t_1,s_matrix_1)
+			
+			K7 =  linear_RL(guess1[12],guess1[13],new_mults_t_1,s_matrix_2)
+			
+			WN = WHE_NSE(guess1[14],guess1[15],t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
+			
+			K_1 = K1 + K2 + K3 + K4 + K5 + K6 + K7 + WN
+			
+			K_inv = numpy.linalg.inv(K_1)
+			matmul_tmp = numpy.matmul(y_transpose_1,K_inv)
+			term1 = (-1./2.) * numpy.matmul(matmul_tmp,y_1)
+			det_k = numpy.linalg.slogdet(K_1)[1]
+			term2 = (1./2.) * det_k
+			term3 = (float(len(y_1))/2.) * numpy.log(2.*numpy.pi)
+			opt_outs_GPR_1 = term1 - term2 - term3
+			
+			opt_outs_GPR = opt_outs_GPR_1[0]
+			
+			if opt_outs_GPR > 0:
+				opt_outs_GPR = numpy.nan
+			
+			opt_outs_GPR = opt_outs_GPR * -1.
+
+			return opt_outs_GPR		
+
+		lb1 = guess_orig*0.
+		ub1= lb1 + 9999.
+		'''
+		bounds2 = []
+		for n in range(0,len(ub1)):
+			bounds2.append([lb1[n],ub1[n]],)
+		bounds2 = tuple(bounds2)
+		'''
+		print("Original:",guess_orig)
+		bounds1 = scipy.optimize.Bounds(lb=0., ub=numpy.inf, keep_feasible=False)
+		res = scipy.optimize.minimize(optimize_MLE_merge_guess_f,guess_orig,method='Nelder-Mead',bounds=bounds1,tol=10e-6,options={'maxfev':30000})
+		#res = scipy.optimize.differential_evolution(optimize_MLE_merge_guess_f,bounds2,x0=guess_orig,maxiter=1000)
+		
+		guess_orig2 = res.x
+		#guess_orig2 = guess_orig*1.
+		
+		print ("Nelder-Mead:",guess_orig2)
+		
+		old_alpha = numpy.absolute(guess_orig2)
+		new_alpha = old_alpha * 1.0
+		
+		stepsizes = guess_orig/stepsize_divisor
+
+		output_matrix_A = numpy.zeros((MCMC_iters,len(guess_orig2)))* numpy.nan
+
+		loglik_output = numpy.zeros((MCMC_iters,2))
+		accept_output = numpy.zeros((MCMC_iters,2)) * numpy.nan
+
+		# Metropolis-Hastings
+
+		file_out = wkspc + 'posterior_hyperparams.csv'
+		file_out2 = wkspc + 'accept_array.csv'
+
+		print ("go")
+
+		t1 = float(time.time())
+		index_to_change = 0
+		for n in range(MCMC_iters):
+
+			if n % 1000 == 0:
+			
+				if n > 0:
+					t2 = float(time.time())
+					time_per = (t2 - t1) / (float(n))
+					accept_output[n,1] = time_per
+					print ("...")
+					print ("accept rate: ", numpy.mean(accept_output[0:n,0]))
+					print ("process time rate: ",time_per)
+					print ("loglik: ",old_loglik)
+					print ("###")
+				
+					numpy.savetxt(file_out,output_matrix_A,delimiter=',',fmt='%10.8e')
+					numpy.savetxt(file_out2,accept_output,delimiter=',',fmt='%10.5f')	
+				
+			if n > 0:
+				old_alpha  = output_matrix_A[n-1,:]
+				old_loglik = loglik_output[n-1,0]
+
+			new_alpha[index_to_change] = numpy.absolute(numpy.random.normal(loc = old_alpha[index_to_change], scale = stepsizes[index_to_change]))
+			index_to_change = index_to_change + 1
+
+			if index_to_change == len(new_alpha):
+				index_to_change = 0		
+			
+			new_loglik = optimize_MLE_merge_guess(new_alpha)
+			
+			if n == 0:
+				old_loglik = new_loglik * .9999999999999
+				
+			if numpy.isnan(new_loglik) == False:
+				if (new_loglik < old_loglik):
+					output_matrix_A[n,:] = new_alpha
 					loglik_output[n,0] = new_loglik
 					accept_output[n,0] = 1.0
 
-				else:
-					output_matrix_A[n,:] = old_alpha
-					loglik_output[n,0] = old_loglik
-					accept_output[n,0] = 0.0
+				else:			
+					u = numpy.random.uniform(0.0,1.0)
+					
+					if (u < numpy.exp(old_loglik - new_loglik)):
+						output_matrix_A[n,:] = new_alpha				
+						loglik_output[n,0] = new_loglik
+						accept_output[n,0] = 1.0
 
-		else:
-			output_matrix_A[n,:] = old_alpha
-			loglik_output[n,0] = old_loglik
-			accept_output[n,0] = 0.0
+					else:
+						output_matrix_A[n,:] = old_alpha
+						loglik_output[n,0] = old_loglik
+						accept_output[n,0] = 0.0
 
-	numpy.savetxt(file_out,output_matrix_A,delimiter=',',fmt='%10.8e')
-	numpy.savetxt(file_out2,accept_output,delimiter=',',fmt='%10.5f')
+			else:
+				output_matrix_A[n,:] = old_alpha
+				loglik_output[n,0] = old_loglik
+				accept_output[n,0] = 0.0
 
+		numpy.savetxt(file_out,output_matrix_A,delimiter=',',fmt='%10.8e')
+		numpy.savetxt(file_out2,accept_output,delimiter=',',fmt='%10.5f')
 
-	w1 = numpy.argsort(loglik_output[:,0])[0]
+		w1 = numpy.argsort(loglik_output[:,0])[int(len(loglik_output[:,0])/2)]
+		
+		print(loglik_output[w1,0])
+		
+		MAP_est = output_matrix_A[w1,:]
+		
+		print ("MAP:",MAP_est)
 	
-	print(loglik_output[w1,0])
-	
-	MAP_est = output_matrix_A[w1,:]
-	
-	print ("MAP:",MAP_est)
-	
+	if fit == 2:
+		MAP_est = guess_orig*1.
+		
 	########################################################################
 	########################################################################
 	########################################################################
