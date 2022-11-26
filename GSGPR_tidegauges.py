@@ -46,7 +46,7 @@ import GSGPR_GloRegLoc_py
 #tide gauge data from:
 ##1 AC, NJ; 2 SH, NJ; 3 NYC, NY;
 ##4 MTK, NY; 5 PTL, ME; and 6 BH, ME
-##and the Church and White (2016) GMSL record
+##and the Church and White (2011; doi:10.1007/s10712-011-9119-1) GMSL record
 
 #remove these lines and  a different data series 
 #using format specified below to apply this tool generally
