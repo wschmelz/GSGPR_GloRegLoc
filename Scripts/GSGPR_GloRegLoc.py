@@ -52,7 +52,7 @@ def WHE_NSE(hyp1_in,hyp2_in,t_matrix_i,noise_mat_in,s_mat1,s_mat2):
 #loc_names is the location names relative to ID2 [ID2,location name]
 #glob_ID1 is the 'regional' identifier of the global dataseries
 #glob_ID2 is the 'local' identifier of the global dataseries
-#guess_orig is 15 item vector - original guess for parameters
+#guess_orig is 14 item vector - original guess for parameters
 #stepsize_divisor is a single positive floating point number, 10-100 is reasonable.
 #f_ev_iters is number of function evaluations for Nelder-Mead optimization process
 #MCMC_iters is number of  iterations for MCMC process, 2000-10000 is reasonable
@@ -258,9 +258,6 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 
 		# Metropolis-Hastings
 
-		file_out = wkspc + 'posterior_hyperparams.csv'
-		file_out2 = wkspc + 'accept_array.csv'
-
 		t1 = float(time.time())
 		index_to_change = 0
 		for n in range(MCMC_iters):
@@ -278,10 +275,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 				print ("Time (s) per iteration: ",round(time_per,2))
 				print ("Approx. time (m) remaining:",round((time_per*(MCMC_iters-float(n+1)))/60.,2))					
 				print ("")
-			
-				numpy.savetxt(file_out,output_matrix_A,delimiter=',',fmt='%10.8e')
-				numpy.savetxt(file_out2,accept_output,delimiter=',',fmt='%10.5f')	
-				
+
 			if n > 0:
 				old_alpha  = output_matrix_A[n-1,:]
 				old_loglik = loglik_output[n-1,0]
@@ -320,9 +314,6 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 				output_matrix_A[n,:] = old_alpha
 				loglik_output[n,0] = old_loglik
 				accept_output[n,0] = 0.0
-
-		numpy.savetxt(file_out,output_matrix_A,delimiter=',',fmt='%10.8e')
-		numpy.savetxt(file_out2,accept_output,delimiter=',',fmt='%10.5f')
 
 		w1 = numpy.argsort(loglik_output[:,0])[int(len(loglik_output[:,0])/2)]
 		
@@ -502,7 +493,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 	output_GRL_stdev = numpy.sqrt(numpy.diag(K_2 - new_y_p_2)) * 1.0
 	
 	output_matrix[:,3] = output_GRL * 1.0
-	output_matrix[:,4] = output_GRL_stdev	* 1.0
+	output_matrix[:,4] = output_GRL_stdev * 1.0
 	
 	filename = "output_GRL.txt"
 	numpy.savetxt(filename, output_matrix, fmt='%0.4f', delimiter=',')
