@@ -205,16 +205,32 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,st
 			return opt_outs_GPR		
 
 		lb1 = guess_orig*0.
-		ub1= lb1 + 9999.
+		ub1= lb1 + numpy.inf
 		'''
+		bounds1 = scipy.optimize.Bounds(lb=0., ub=numpy.inf, keep_feasible=False)
+		'''
+		
+		unique_l1 = numpy.unique(xes5_type_2)
+		
+		out_tmp = numpy.zeros(len(unique_l1))
+		for n in range(0,len(unique_l1)):
+			
+			w1 = numpy.where(xes5_type_2==unique_l1[n])[0]
+			w2 = numpy.argsort(xes1_t_1[w1])
+			out_tmp[n] = numpy.quantile(xes1_t_1[w1[w2[1:]]] - xes1_t_1[w1[w2[0:-1]]],0.5)
+		median_dt = numpy.quantile(out_tmp,0.5)
+
 		bounds2 = []
 		for n in range(0,len(ub1)):
-			bounds2.append([lb1[n],ub1[n]],)
+			if n == 7:
+				bounds2.append([lb1[n],5.*median_dt],)
+			else:
+				bounds2.append([lb1[n],ub1[n]],)
 		bounds2 = tuple(bounds2)
-		'''
+		
 		print("Original:",guess_orig)
-		bounds1 = scipy.optimize.Bounds(lb=0., ub=numpy.inf, keep_feasible=False)
-		res = scipy.optimize.minimize(optimize_MLE_merge_guess_f,guess_orig,method='Nelder-Mead',bounds=bounds1,tol=10e-6,options={'maxfev':30000})
+		
+		res = scipy.optimize.minimize(optimize_MLE_merge_guess_f,guess_orig,method='Nelder-Mead',bounds=bounds2,tol=10e-6,options={'maxfev':30000})
 		#res = scipy.optimize.differential_evolution(optimize_MLE_merge_guess_f,bounds2,x0=guess_orig,maxiter=1000)
 		
 		guess_orig2 = res.x
