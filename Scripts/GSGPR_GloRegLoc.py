@@ -750,13 +750,13 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 
 			w_l2 = numpy.where(s_vals2==l_val)[0]
 			r_val = int(s_vals1[w_l2][0])
-			label1 = name_str_l+": G(t) + R$_" + str(r_val) + "$(t) + L$_" + str(int(l_val)) + "$(t)"
+			label1 = name_str_l+": G(t) + R$_" + str(r_val) + "$(t) + L$_{" +str(r_val) + "," +  str(int(l_val)) + "}$(t)"
 			
-			ax1.fill_between(t_vals[w_l2],output_GRL[w_l2] - 2.*output_GRL_stdev[w_l2]	,output_GRL[w_l2] + 2.*output_GRL_stdev[w_l2]	,alpha=0.1,color="blue")
-			ax1.fill_between(t_vals[w_l2],output_GRL[w_l2] - output_GRL_stdev[w_l2]		,output_GRL[w_l2] + output_GRL_stdev[w_l2]	,alpha=0.2,color="blue")
+			ax1.fill_between(t_vals[w_l2],output_GRLe[w_l2] - 2.*output_GRLe_stdev[w_l2]	,output_GRLe[w_l2] + 2.*output_GRLe_stdev[w_l2]	,alpha=0.1,color="blue")
+			ax1.fill_between(t_vals[w_l2],output_GRLe[w_l2] - output_GRLe_stdev[w_l2]	,output_GRLe[w_l2] + output_GRLe_stdev[w_l2]	,alpha=0.2,color="blue")
 
 			ax1.plot(t_vals[w_g2],output_G[w_g2],color='k',linewidth=1.0,label=label_g)	
-			ax1.plot(t_vals[w_l2],output_GRL[w_l2],linewidth=1.0,color="blue",label=label1)			
+			ax1.plot(t_vals[w_l2],output_GRLe[w_l2],linewidth=1.0,color="blue",label=label1)			
 			w_l1 = numpy.where(xes5_type_2==l_val)[0]		
 			label_2 = name_str_l + " data"
 			ax1.plot(xes1_t_1[w_l1],xes2_sl_1[w_l1],color='dodgerblue',marker='x',markersize=1.0,linewidth=0.0,label=label_2)	
@@ -769,7 +769,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 			
 			w_l2 = numpy.where(s_vals2==l_val)[0]
 			r_val = int(s_vals1[w_l2][0])
-			label1 = name_str_l+" - "+label_g+":R$_" + str(r_val) + "$(t) + L$_" + str(int(l_val)) + "$(t)"
+			label1 = name_str_l+" - "+label_g+":R$_" + str(r_val) + "$(t) + L$_{" +str(r_val) + "," +  str(int(l_val)) + "}$(t) - mL2(t)"
 			
 			ax1.fill_between(t_vals[w_l2],output_RL[w_l2] - 2.*output_RL_stdev[w_l2]	,output_RL[w_l2] + 2.*output_RL_stdev[w_l2]	,alpha=0.1,color="red")
 			ax1.fill_between(t_vals[w_l2],output_RL[w_l2] - output_RL_stdev[w_l2]		,output_RL[w_l2] + output_RL_stdev[w_l2]	,alpha=0.2,color="red")
