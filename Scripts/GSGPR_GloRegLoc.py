@@ -283,7 +283,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 				old_loglik = loglik_output[n-1,0]
 
 			new_alpha[index_to_change] = numpy.absolute(numpy.random.normal(loc = old_alpha[index_to_change], scale = stepsizes[index_to_change]))
-			if index_to_change = 7:
+			if index_to_change == 7:
 				if new_alpha[index_to_change] > 3.*median_dt:
 					new_alpha[index_to_change] = 3.*median_dt
 			index_to_change = index_to_change + 1
