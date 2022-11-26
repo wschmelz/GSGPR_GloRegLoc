@@ -320,7 +320,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 				loglik_output[n,0] = old_loglik
 				accept_output[n,0] = 0.0
 
-		w1 = numpy.argsort(loglik_output[:,0])[0]#[int(len(loglik_output[:,0])/2)]
+		w1 = numpy.argsort(loglik_output[:,0])[int(len(loglik_output[:,0])/2)]
 		
 		print(loglik_output[w1,0])
 		
