@@ -231,11 +231,11 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 		
 		bounds2 = []
 		for n in range(0,len(ub1)):
-			if n == 1 or n == 3:	
+			if n == 1 or n == 3 or n == 5:	
 				bounds2.append([lb1[n],(numpy.max(xes1_t_1)-numpy.min(xes1_t_1))*.75],)
-			if n == 5:
+			if n == 7:
 				bounds2.append([lb1[n],5.*median_dt],)
-			if ((n==0 or n==2) or n ==4) or n > 5:
+			if n==0 or n==2 or n ==4 or n == 6 or n > 7:
 				bounds2.append([lb1[n],ub1[n]],)
 		
 		bounds2 = tuple(bounds2)
