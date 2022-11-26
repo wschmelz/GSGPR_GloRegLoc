@@ -132,7 +132,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 			
 			K3 =  matern(guess1[4],3.,guess1[5],t_matrix_1) * s_matrix_2
 			
-			K4 =  matern(guess1[6],1.,guess1[7],t_matrix_1) * s_matrix_2
+			K4 =  matern(guess1[6],3.,guess1[7],t_matrix_1) * s_matrix_2
 			
 			K5 =  linear_G(guess1[8],guess1[9],new_mults_t_1)
 			
@@ -182,7 +182,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 			
 			K3 =  matern(guess1[4],3.,guess1[5],t_matrix_1) * s_matrix_2
 			
-			K4 =  matern(guess1[6],1.,guess1[7],t_matrix_1) * s_matrix_2
+			K4 =  matern(guess1[6],3.,guess1[7],t_matrix_1) * s_matrix_2
 			
 			K5 =  linear_G(guess1[8],guess1[9],new_mults_t_1)
 			
@@ -234,7 +234,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 			if n == 1 or n == 3 or n == 5:	
 				bounds2.append([lb1[n],(numpy.max(xes1_t_1)-numpy.min(xes1_t_1))*.75],)
 			if n == 7:
-				bounds2.append([lb1[n],5.*median_dt],)
+				bounds2.append([lb1[n],3.*median_dt],)
 			if n==0 or n==2 or n ==4 or n == 6 or n > 7:
 				bounds2.append([lb1[n],ub1[n]],)
 		
@@ -283,6 +283,9 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 				old_loglik = loglik_output[n-1,0]
 
 			new_alpha[index_to_change] = numpy.absolute(numpy.random.normal(loc = old_alpha[index_to_change], scale = stepsizes[index_to_change]))
+			if index_to_change = 7:
+				if new_alpha[index_to_change] > 3.*median_dt:
+					new_alpha[index_to_change] = 3.*median_dt
 			index_to_change = index_to_change + 1
 
 			if index_to_change == len(new_alpha):
@@ -436,7 +439,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 	
 	K3_1 = matern(hyp5,3.,hyp6,t_matrix_1) * s_matrix_2	
 	
-	K4_1 = matern(hyp7,1.,hyp8,t_matrix_1) * s_matrix_2
+	K4_1 = matern(hyp7,3.,hyp8,t_matrix_1) * s_matrix_2
 
 	K5_1 = linear_G(hyp9,hyp10,new_mults_t_1)
 	
@@ -458,7 +461,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 
 	K3_2 =  matern(hyp5,3.,hyp6,t_new_1) * s_matrix_2_b	
 
-	K4_2 =  matern(hyp7,1.,hyp8,t_new_1) * s_matrix_2_b	
+	K4_2 =  matern(hyp7,3.,hyp8,t_new_1) * s_matrix_2_b	
 	
 	K5_2 =  linear_G(hyp9,hyp10,t_mults_new_1)
 	
@@ -479,7 +482,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 
 	K3_3 =  matern(hyp5,3.,hyp6,t_matrix2_1) *  s_matrix_2_c	
 	
-	K4_3 =  matern(hyp7,1.,hyp8,t_matrix2_1) *  s_matrix_2_c		
+	K4_3 =  matern(hyp7,3.,hyp8,t_matrix2_1) *  s_matrix_2_c		
 	
 	K5_3 =  linear_G(hyp9,hyp10,t_matrix2_mult_1)
 
