@@ -134,13 +134,13 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 			
 			#K4 =  matern(guess1[6],1.,guess1[7],t_matrix_1) * s_matrix_2
 			
-			K5 =  linear_G(guess1[8],guess1[9],new_mults_t_1)
+			K5 =  linear_G(guess1[6],guess1[7],new_mults_t_1)
 			
-			K6 =  linear_RL(guess1[10],guess1[11],new_mults_t_1,s_matrix_1)
+			K6 =  linear_RL(guess1[8],guess1[9],new_mults_t_1,s_matrix_1)
 			
-			K7 =  linear_RL(guess1[12],guess1[13],new_mults_t_1,s_matrix_2)
+			K7 =  linear_RL(guess1[10],guess1[11],new_mults_t_1,s_matrix_2)
 			
-			WN = WHE_NSE(guess1[14],guess1[15],t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
+			WN = WHE_NSE(guess1[12],guess1[13],t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
 			
 			K_1 = K1 + K2 + K3 + K5 + K6 + K7 + WN  #+ K4
 			
@@ -184,13 +184,13 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 			
 			#K4 =  matern(guess1[6],1.,guess1[7],t_matrix_1) * s_matrix_2
 			
-			K5 =  linear_G(guess1[8],guess1[9],new_mults_t_1)
+			K5 =  linear_G(guess1[6],guess1[7],new_mults_t_1)
 			
-			K6 =  linear_RL(guess1[10],guess1[11],new_mults_t_1,s_matrix_1)
+			K6 =  linear_RL(guess1[8],guess1[9],new_mults_t_1,s_matrix_1)
 			
-			K7 =  linear_RL(guess1[12],guess1[13],new_mults_t_1,s_matrix_2)
+			K7 =  linear_RL(guess1[10],guess1[11],new_mults_t_1,s_matrix_2)
 			
-			WN = WHE_NSE(guess1[14],guess1[15],t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
+			WN = WHE_NSE(guess1[12],guess1[13],t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
 			
 			K_1 = K1 + K2 + K3 + K5 + K6 + K7 + WN #+ K4
 			
@@ -231,7 +231,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 		
 		bounds2 = []
 		for n in range(0,len(ub1)):
-			if n == 7:
+			if n == 5:
 				bounds2.append([lb1[n],5.*median_dt],)
 			else:
 				bounds2.append([lb1[n],ub1[n]],)
@@ -431,7 +431,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 	output_matrix[:,1] = s_vals1
 	output_matrix[:,2] = s_vals2
 
-	hyp1,hyp2,hyp3,hyp4,hyp5,hyp6,hyp7,hyp8,hyp9,hyp10,hyp11,hyp12,hyp13,hyp14,hyp15,hyp16 =  MAP_est
+	hyp1,hyp2,hyp3,hyp4,hyp5,hyp6,hyp7,hyp8,hyp9,hyp10,hyp11,hyp12,hyp13,hyp14 =  MAP_est
 
 	################1################
 	
@@ -445,13 +445,13 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 	
 	#K4_1 = matern(hyp7,1.,hyp8,t_matrix_1) * s_matrix_2
 
-	K5_1 = linear_G(hyp9,hyp10,new_mults_t_1)
+	K5_1 = linear_G(hyp7,hyp8,new_mults_t_1)
 	
-	K6_1 = linear_RL(hyp11,hyp12,new_mults_t_1,s_matrix_1)
+	K6_1 = linear_RL(hyp9,hyp10,new_mults_t_1,s_matrix_1)
 
-	K7_1 = linear_RL(hyp13,hyp14,new_mults_t_1,s_matrix_2)	
+	K7_1 = linear_RL(hyp11,hyp12,new_mults_t_1,s_matrix_2)	
 	
-	WN = WHE_NSE(hyp15,hyp16,t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
+	WN = WHE_NSE(hyp13,hyp14,t_matrix_1,noise_mat_1,s_matrix_3,s_matrix_4)
 
 	K = K1_1 + K2_1 + K3_1 + K5_1 + K6_1 + K7_1 + WN #+ K4_1 
 		
@@ -467,11 +467,11 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 
 	#K4_2 =  matern(hyp7,1.,hyp8,t_new_1) * s_matrix_2_b	
 	
-	K5_2 =  linear_G(hyp9,hyp10,t_mults_new_1)
+	K5_2 =  linear_G(hyp7,hyp8,t_mults_new_1)
 	
-	K6_2 =  linear_RL(hyp11,hyp12,t_mults_new_1,s_matrix_1_b)
+	K6_2 =  linear_RL(hyp9,hyp10,t_mults_new_1,s_matrix_1_b)
 	
-	K7_2 =  linear_RL(hyp13,hyp14,t_mults_new_1,s_matrix_2_b)
+	K7_2 =  linear_RL(hyp11,hyp12,t_mults_new_1,s_matrix_2_b)
 	
 	K2_f = K1_2 + K2_2 + K3_2 + K5_2 + K6_2 + K7_2 # + K4_2
 
@@ -488,11 +488,11 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 	
 	#K4_3 =  matern(hyp7,1.,hyp8,t_matrix2_1) *  s_matrix_2_c		
 	
-	K5_3 =  linear_G(hyp9,hyp10,t_matrix2_mult_1)
+	K5_3 =  linear_G(hyp7,hyp8,t_matrix2_mult_1)
 
-	K6_3 =  linear_RL(hyp11,hyp12,t_matrix2_mult_1,s_matrix_1_c)
+	K6_3 =  linear_RL(hyp9,hyp10,t_matrix2_mult_1,s_matrix_1_c)
 	
-	K7_3 =  linear_RL(hyp13,hyp14,t_matrix2_mult_1,s_matrix_2_c)	
+	K7_3 =  linear_RL(hyp11,hyp12,t_matrix2_mult_1,s_matrix_2_c)	
 
 	K_2 = K1_3 + K2_3 + K3_3 + K5_3 + K6_3 + K7_3 # + K4_3 
 
@@ -501,8 +501,8 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 	output_GRL = numpy.ndarray.flatten(new_y) * 1.0
 	output_GRL_stdev = numpy.sqrt(numpy.diag(K_2 - new_y_p_2)) * 1.0
 	
-	output_matrix[:,3] = output_GRLe * 1.0
-	output_matrix[:,4] = output_GRLe_stdev	* 1.0
+	output_matrix[:,3] = output_GRL * 1.0
+	output_matrix[:,4] = output_GRL_stdev	* 1.0
 	
 	filename = "output_GRL.txt"
 	numpy.savetxt(filename, output_matrix, fmt='%0.4f', delimiter=',')
