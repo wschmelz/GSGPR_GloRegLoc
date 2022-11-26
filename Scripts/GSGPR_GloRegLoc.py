@@ -54,11 +54,12 @@ def WHE_NSE(hyp1_in,hyp2_in,t_matrix_i,noise_mat_in,s_mat1,s_mat2):
 #glob_ID2 is the 'local' identifier of the global dataseries
 #guess_orig is 15 item vector - original guess for parameters
 #stepsize_divisor is a single positive floating point number, 10-100 is reasonable.
+#f_ev_iters is number of function evaluations for Nelder-Mead optimization process
 #MCMC_iters is number of  iterations for MCMC process, 2000-10000 is reasonable
 #new_dt is sample rate of plotted functions
 #fit indicates whether to refit parameters: 1 is fit, 2 is use guess_orig
 
-def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,stepsize_divisor,MCMC_iters,new_dt,fit):
+def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_ev_iters,MCMC_iters,stepsize_divisor,new_dt,fit):
 	global count
 	xes1_t_1 = data_series[:,0]
 	xes2_sl_1 = data_series[:,1]
@@ -122,6 +123,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,st
 	new_mults_t_1 = numpy.repeat(numpy.reshape(xes1_t_1,(1,-1)),n_SL_1,axis=0) * numpy.repeat(numpy.reshape(xes1_t_1,(-1,1)),n_SL_1,axis=1)
 	count = 0
 	if fit == 1:
+		t1 = float(time.time())
 		def optimize_MLE_merge_guess_f(guess1):
 			global count
 			K1 =  matern(guess1[0],3.,guess1[1],t_matrix_1)
@@ -158,12 +160,17 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,st
 			opt_outs_GPR = opt_outs_GPR * -1.
 			
 			count = count + 1
-			if count % 1000 == 0:
+			if count % 500 == 0 or count==10:
+				t2 = float(time.time())
+				time_per = (t2 - t1) / (float(count))
+				print ("")
 				print ("Count:",count)
 				#print("Diff. evo. params tmp:",guess1)
-				print("Nelder-Mead params tmp:",guess1)
+				print("Nelder-Mead params:",guess1)
 				#print("Diff. evo. loglik tmp:",opt_outs_GPR)
-				print("Nelder-Mead loglik tmp:",opt_outs_GPR)
+				print("Nelder-Mead loglik:",opt_outs_GPR)
+				print("Time (s) per iteration:",round(time_per,2))
+				print("Max time (m) remaining:",round(((time_per*(f_ev_iters-count))+(time_per*MCMC_iters))/60.,2))
 				print ("")
 			return opt_outs_GPR
 			
@@ -204,11 +211,10 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,st
 
 			return opt_outs_GPR		
 
-		lb1 = guess_orig*0.
-		ub1= lb1 + numpy.inf
 		'''
 		bounds1 = scipy.optimize.Bounds(lb=0., ub=numpy.inf, keep_feasible=False)
 		'''
+		stepsizes = guess_orig/stepsize_divisor
 		
 		unique_l1 = numpy.unique(xes5_type_2)
 		
@@ -219,18 +225,22 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,st
 			w2 = numpy.argsort(xes1_t_1[w1])
 			out_tmp[n] = numpy.quantile(xes1_t_1[w1[w2[1:]]] - xes1_t_1[w1[w2[0:-1]]],0.5)
 		median_dt = numpy.quantile(out_tmp,0.5)
-
+		
+		lb1 = guess_orig*0.
+		ub1= lb1 + numpy.inf
+		
 		bounds2 = []
 		for n in range(0,len(ub1)):
 			if n == 7:
 				bounds2.append([lb1[n],5.*median_dt],)
 			else:
 				bounds2.append([lb1[n],ub1[n]],)
+		
 		bounds2 = tuple(bounds2)
 		
 		print("Original:",guess_orig)
 		
-		res = scipy.optimize.minimize(optimize_MLE_merge_guess_f,guess_orig,method='Nelder-Mead',bounds=bounds2,tol=10e-6,options={'maxfev':30000})
+		res = scipy.optimize.minimize(optimize_MLE_merge_guess_f,guess_orig,method='Nelder-Mead',bounds=bounds2,tol=10e-6,options={'maxfev':f_ev_iters})
 		#res = scipy.optimize.differential_evolution(optimize_MLE_merge_guess_f,bounds2,x0=guess_orig,maxiter=1000)
 		
 		guess_orig2 = res.x
@@ -241,8 +251,6 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,st
 		old_alpha = numpy.absolute(guess_orig2)
 		new_alpha = old_alpha * 1.0
 		
-		stepsizes = guess_orig/stepsize_divisor
-
 		output_matrix_A = numpy.zeros((MCMC_iters,len(guess_orig2)))* numpy.nan
 
 		loglik_output = numpy.zeros((MCMC_iters,2))
@@ -253,26 +261,26 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,st
 		file_out = wkspc + 'posterior_hyperparams.csv'
 		file_out2 = wkspc + 'accept_array.csv'
 
-		print ("go")
-
 		t1 = float(time.time())
 		index_to_change = 0
 		for n in range(MCMC_iters):
 
-			if n % 1000 == 0:
+			if (n+1) % 500 == 0 or n+1 == 10:
 			
-				if n > 0:
-					t2 = float(time.time())
-					time_per = (t2 - t1) / (float(n))
-					accept_output[n,1] = time_per
-					print ("...")
-					print ("accept rate: ", numpy.mean(accept_output[0:n,0]))
-					print ("process time rate: ",time_per)
-					print ("loglik: ",old_loglik)
-					print ("###")
-				
-					numpy.savetxt(file_out,output_matrix_A,delimiter=',',fmt='%10.8e')
-					numpy.savetxt(file_out2,accept_output,delimiter=',',fmt='%10.5f')	
+				t2 = float(time.time())
+				time_per = (t2 - t1) / (float(n+1))
+				accept_output[n,1] = time_per
+				print ("")
+				print ("MCMC count: ", n+1)
+				print ("MCMC accept rate: ", numpy.mean(accept_output[0:n,0]))
+				print ("MCMC params:",old_alpha)
+				print ("MCMC loglik: ",old_loglik)
+				print ("Time (s) per iteration: ",round(time_per,2))
+				print ("Approx. time (m) remaining:",round((time_per*(MCMC_iters-float(n+1)))/60.,2))					
+				print ("")
+			
+				numpy.savetxt(file_out,output_matrix_A,delimiter=',',fmt='%10.8e')
+				numpy.savetxt(file_out2,accept_output,delimiter=',',fmt='%10.5f')	
 				
 			if n > 0:
 				old_alpha  = output_matrix_A[n-1,:]
