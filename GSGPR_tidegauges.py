@@ -149,7 +149,7 @@ glob_ID2 = 0
 guess_orig = numpy.array([50.,25.,50.,25.,50.,25.,25.,1.,5.,1.,5.,1.,1.,1.,10.,10.])
 f_ev_iters = 5000
 MCMC_iters = 3000
-stepsize_divisor=50
+stepsize_divisor=20
 new_dt =  0.25
 
 GSGPR_GloRegLoc_py.GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_ev_iters,MCMC_iters,stepsize_divisor,new_dt,1)
