@@ -149,4 +149,4 @@ MCMC_iters = 1000
 stepsize_divisor=10
 new_dt =  0.25
 
-GSGPR_GloRegLoc_20221125.GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_ev_iters,MCMC_iters,stepsize_divisor,new_dt,1)
+GSGPR_GloRegLoc_py.GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_ev_iters,MCMC_iters,stepsize_divisor,new_dt,1)
