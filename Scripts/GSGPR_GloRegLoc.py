@@ -762,7 +762,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 			
 			w_l2 = numpy.where(s_vals2==l_val)[0]
 			r_val = int(s_vals1[w_l2][0])
-			label1 = name_str_l+" - "+label_g+":R$_" + str(r_val) + "$(t) + L$_{" +str(r_val) + "," +  str(int(l_val)) + "}$(t)"# - mL2$_{" +str(r_val) + "," +  str(int(l_val)) + "}(t)"
+			label1 = name_str_l+" - "+str(name_str_g)+": R$_" + str(r_val) + "$(t) + L$_{" +str(r_val) + "," +  str(int(l_val)) + "}$(t)"# - mL2$_{" +str(r_val) + "," +  str(int(l_val)) + "}(t)"
 			
 			ax1.fill_between(t_vals[w_l2],output_RL[w_l2] - 2.*output_RL_stdev[w_l2]	,output_RL[w_l2] + 2.*output_RL_stdev[w_l2]	,alpha=0.1,color="red")
 			ax1.fill_between(t_vals[w_l2],output_RL[w_l2] - output_RL_stdev[w_l2]		,output_RL[w_l2] + output_RL_stdev[w_l2]	,alpha=0.2,color="red")
