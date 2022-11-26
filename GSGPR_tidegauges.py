@@ -98,42 +98,45 @@ reg_names = numpy.array(reg_names_tmp)
 #glob_ID2 is the 'local' identifier of the global dataseries
 #guess_orig is 16 item vector - original guess for parameters
 
-##x_i = G(t_i) + E_xi + w_x
-##y_i = G(t_i) + R_m(t_i) + L_n(t_i) + E_yi + w_y; m=1,...,M and n=1,...,N
+#t is time; m is region; n is site
 
-##G(t) = matern_g(t) + linear_g(t) + offset_g
-##R_m(t) = G(t) + matern_r(t) + linear_r(t) + offset_r; m=1,...,M
-##L_m,n(t) = R_m(t) + matern_l1(t) + matern_l2(t) + linear_l(t) + offset_l; m=1,...,M and n=1,...,N
+##x_i = G(t_i) + E_xi + w_x
+##y_j,m,n = G(t_j,m_j,n_j) + R_m(t_j,m_j,n_j) + L_n(t_j,m_j,n_j) + E_y(t_j,m_j,n_j) + w_y
+
+##G(t) = matern_G(t) + linear_G(t) + offset_G
+##R(t,m) = G(t) + maternR(t,m) + linear_R_m(t,m) + offset_R(m)
+##L(t,m,n) = R(t,m) + matern_L1(t,m,n) + matern_L2(t,m,n) + linear_L(t,m,n) + offset_L(m,n)
 
 ##G(t) ~ GP[0,K_G(t,t^')]
-##R_m(t) ~ GP[0,K_R_m(t_m,t_m^')]; m=1,...,M
-##L_m,n(t) ~ GP[0,K_L_m,n(t_m,n,t_m,n^')]; m=1,...,M and n=1,...,N
+##R(t,m) ~ GP[0,K_R(t,t^';m,m^')]
+##L(t,m,n) ~ GP[0,K_L(t,t^';m,m^';n,n^')]
 
-##K_G(t,t^') = k_matern_g(t,t^') + σ_linear_g^2(t-t_0)(t^'-t_0 ) + σ_offset_g^2
-##K_R_m(t_m,t_m^') = K_G(t,t^') + matern_r(t_m,t_m^') + σ_linear_r^2(t_m-t_0,m)(t_m^'-t_0,m ) + σ_offset_r^2; m=1,...,M
-##K_L_m,n(t_m,n,t_m,n^') = K_G(t,t^') + K_R_m(t_m,t_m^') + matern_l1(t_n,t_n^') + matern_l2(t_n,t_n^') + σ_linear_l^2(t_n-t_0,n)(t_n^'-t_0,n) + σ_offset_l^2;m=1,...,M and n=1,...,N
+##K_G(t,t^') = k_matern_G(t,t^') + σ_linear_G^2(t-t_0)(t^'-t_0 ) + σ_offset_G^2
+##K_R(t,t^';m,m^') = K_G(t,t^') + matern_R(t,t^')*δ(m-m^') + σ_linear_R^2(t-t_0)(t^'-t_0)*δ(m-m^') + σ_offset_R^2*δ(m-m^')
+##K_L_m,n(t,t^';m,m^';n,n^') = K_G(t,t^') + K_R_m(t,t^';m,m^') + matern_L1(t,t^')*δ(n-n^') + matern_L2(t,t^')*δ(n-n^') + σ_linear_L^2(t-t_0)(t^'-t_0)*δ(n-n^') + σ_offset_L^2*δ(n-n^')
 
-###Nonlinear
-###guess_orig[0] is amplitude parameter for global nonlinear component(matern_g; v=3/2)
-###guess_orig[1] is timescale parameter for global nonlinear component(matern_g; v=3/2)
-###guess_orig[2] is amplitude parameter for regional nonlinear component(matern_r; v=3/2)
-###guess_orig[3] is timescale parameter for regional nonlinear component(matern_r; v=3/2)
-###guess_orig[4] is amplitude parameter for local nonlinear component(matern_l1; v=3/2)
-###guess_orig[5] is timescale parameter for local nonlinear component(matern_l1; v=3/2)
-###guess_orig[6] is amplitude parameter for local nonlinear component(matern_l2; v=1/2)
-###guess_orig[7] is timescale parameter for local nonlinear component(matern_l2; v=1/2)
+###Nonlinear functions
+###guess_orig[0] is amplitude parameter for global nonlinear component(matern_G; v=3/2)
+###guess_orig[1] is timescale parameter for global nonlinear component(matern_G; v=3/2)
+###guess_orig[2] is amplitude parameter for regional nonlinear component(matern_R; v=3/2)
+###guess_orig[3] is timescale parameter for regional nonlinear component(matern_R; v=3/2)
+###guess_orig[4] is amplitude parameter for local nonlinear component(matern_L1; v=3/2)
+###guess_orig[5] is timescale parameter for local nonlinear component(matern_L1; v=3/2)
+###guess_orig[6] is amplitude parameter for local nonlinear component(matern_L2; v=3/2)
+###guess_orig[7] is timescale parameter for local nonlinear component(matern_L2; v=3/2; < 3x dt; local short-term variation)
 
-###Linear
-###guess_orig[8] is offset parameter for global linear component (offset_g)
-###guess_orig[9] is slope parameter for global linear component (linear_g)
-###guess_orig[10] is offset parameter for regional linear component (offset_r)
-###guess_orig[11] is slope parameter for regional linear component (linear_r)
-###guess_orig[12] is offset parameter for local linear component (offset_l)
-###guess_orig[13] is slope parameter for local linear component (linear_l)
+###Linear functions
+###guess_orig[8] is offset parameter for global linear component (offset_G)
+###guess_orig[9] is slope parameter for global linear component (linear_G)
+###guess_orig[10] is offset parameter for regional linear component (offset_R)
+###guess_orig[11] is slope parameter for regional linear component (linear_R)
+###guess_orig[12] is offset parameter for local linear component (offset_L)
+###guess_orig[13] is slope parameter for local linear component (linear_L)
 
-###Error
+###Error components
 ###guess_orig[14] is error term for data in global set (w_x)
 ###guess_orig[15] is error term for all data not in global set (w_y)
+
 
 #f_ev_iters is number of function evaluations for Nelder-Mead optimization process
 #MCMC_iters is number of  iterations for MCMC process, 2000-10000 is reasonable
@@ -143,10 +146,10 @@ reg_names = numpy.array(reg_names_tmp)
 
 glob_ID1 = 0
 glob_ID2 = 0
-guess_orig = numpy.array([100.,100.,100.,100.,100.,50.,100.,0.1,5.,1.,5.,1.,1.,1.,10.,10.])
-f_ev_iters = 1000
-MCMC_iters = 1000
-stepsize_divisor=10
+guess_orig = numpy.array([50.,25.,50.,25.,50.,25.,25.,1.,5.,1.,5.,1.,1.,1.,10.,10.])
+f_ev_iters = 20000
+MCMC_iters = 5000
+stepsize_divisor=20
 new_dt =  0.25
 
 GSGPR_GloRegLoc_py.GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_ev_iters,MCMC_iters,stepsize_divisor,new_dt,1)
