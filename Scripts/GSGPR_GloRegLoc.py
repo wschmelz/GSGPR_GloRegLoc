@@ -235,7 +235,7 @@ def GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_
 				bounds2.append([lb1[n],numpy.max(xes1_t_1)-numpy.min(xes1_t_1)],)
 			if n == 5:
 				bounds2.append([lb1[n],5.*median_dt],)
-			if (n==2 or n ==4) or n > 5:
+			if ((n==0 or n==2) or n ==4) or n > 5:
 				bounds2.append([lb1[n],ub1[n]],)
 		
 		bounds2 = tuple(bounds2)
