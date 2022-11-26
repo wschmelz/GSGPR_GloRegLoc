@@ -135,16 +135,18 @@ reg_names = numpy.array(reg_names_tmp)
 ###guess_orig[14] is error term for data in global set (w_x)
 ###guess_orig[15] is error term for all data not in global set (w_y)
 
-#stepsize_divisor is a single positive floating point number, 10-100 is reasonable.
+#f_ev_iters is number of function evaluations for Nelder-Mead optimization process
 #MCMC_iters is number of  iterations for MCMC process, 2000-10000 is reasonable
+#stepsize_divisor is a single positive floating point number, 10-100 is reasonable.
 #new_dt is sample rate of plotted functions
 #fit indicates whether to refit parameters: 1 is fit, 2 is use guess_orig
 
 glob_ID1 = 0
 glob_ID2 = 0
-guess_orig = numpy.array([100.,100.,100.,100.,100.,50.,1.,1.,5.,1.,5.,1.,1.,1.,10.,10.])
+guess_orig = numpy.array([100.,100.,100.,100.,100.,50.,100.,0.1,5.,1.,5.,1.,1.,1.,10.,10.])
+f_ev_iters = 1000
+MCMC_iters = 1000
 stepsize_divisor=10
-MCMC_iters = 5000
 new_dt =  0.25
 
-GSGPR_GloRegLoc_py.GP_GloRegLoc(data_series[::3,:],reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,stepsize_divisor,MCMC_iters,new_dt,2)
+GSGPR_GloRegLoc_20221125.GP_GloRegLoc(data_series,reg_names,loc_names,glob_ID1,glob_ID2,guess_orig,f_ev_iters,MCMC_iters,stepsize_divisor,new_dt,1)
